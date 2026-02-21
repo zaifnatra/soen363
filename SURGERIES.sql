@@ -1,0 +1,29 @@
+INSERT INTO SURGERIES (
+    ROW_ID, SURGERY_ID, SUBJECT_ID, HADM_ID,
+    SURGERY_TYPE, PROCEDURE_NAME, SURGERY_DATE,
+    START_TIME, END_TIME, SURGEON_ID, URGENCY)
+SELECT
+    ROW_NUMBER() OVER() as ROW_ID,
+    ROW_NUMBER() OVER() as SURGERY_ID,
+    a.SUBJECT_ID,
+    a.HADM_ID,
+    CASE WHEN ROW_NUMBER() OVER() % 5 = 0 THEN 'Cardiac'
+         WHEN ROW_NUMBER() OVER() % 5 = 1 THEN 'Orthopedic'
+         WHEN ROW_NUMBER() OVER() % 5 = 2 THEN 'Neuro'
+         WHEN ROW_NUMBER() OVER() % 5 = 3 THEN 'General'
+         ELSE 'Vascular' END as SURGERY_TYPE,
+    CASE WHEN ROW_NUMBER() OVER() % 5 = 0 THEN 'Bypass Surgery'
+         WHEN ROW_NUMBER() OVER() % 5 = 1 THEN 'Knee Replacement'
+         WHEN ROW_NUMBER() OVER() % 5 = 2 THEN 'Brain Tumor Removal'
+         WHEN ROW_NUMBER() OVER() % 5 = 3 THEN 'Appendectomy'
+         ELSE 'Vascular Repair' END as PROCEDURE_NAME,
+    a.ADMITTIME + (RANDOM() * (a.DISCHTIME - a.ADMITTIME)) as SURGERY_DATE,
+    a.ADMITTIME + (RANDOM() * (a.DISCHTIME - a.ADMITTIME)) as START_TIME,
+    a.ADMITTIME + (RANDOM() * (a.DISCHTIME - a.ADMITTIME)) as END_TIME,
+    FLOOR(RANDOM() * 100 + 1)::INT as SURGEON_ID,
+    CASE WHEN ROW_NUMBER() OVER() % 3 = 0 THEN 'Elective'
+         WHEN ROW_NUMBER() OVER() % 3 = 1 THEN 'Urgent'
+         ELSE 'Emergency' END as URGENCY
+FROM ADMISSIONS a
+WHERE a.DISCHTIME IS NOT NULL
+LIMIT 500;
